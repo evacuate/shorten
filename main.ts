@@ -31,6 +31,11 @@ app.get("/", (c) => {
   return c.redirect("https://github.com/evacuate");
 });
 
+app.get("/logo.svg", async (c) => {
+  const image = await Deno.readFile("./public/logo.svg");
+  return await c.body(image);
+});
+
 app.get("/favicon.ico", async (c) => {
   const image = await Deno.readFile("./public/favicon.ico");
   return await c.body(image);
@@ -39,7 +44,18 @@ app.get("/favicon.ico", async (c) => {
 app.get("/:id", async (c) => {
   const id = c.req.param("id");
   const storage = await kv.get([id]);
-  return c.redirect(storage.value);
+
+  const body = `
+  <!doctypehtml><html lang=en><link href=/favicon.ico rel=icon sizes=32x32><link href=/logo.svg rel=icon type=image/svg+xml>
+  `;
+
+  if (typeof storage.value === "string") {
+    c.header("Location", storage.value);
+  } else {
+    return c.json({ error: "Invalid storage value" });
+  }
+
+  return c.body(body);
 });
 
 app.use(
