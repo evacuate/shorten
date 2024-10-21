@@ -1,0 +1,22 @@
+{
+  "version": "4",
+  "specifiers": {
+    "jsr:@hono/hono@^4.6.5": "4.6.5",
+    "npm:nanoid@*": "5.0.7"
+  },
+  "jsr": {
+    "@hono/hono@4.6.5": {
+      "integrity": "68efe4a0ab7c4fb082cb71aa894a25e1c6cfad6d124dc943471e6758a7a1bdee"
+    }
+  },
+  "npm": {
+    "nanoid@5.0.7": {
+      "integrity": "sha512-oLxFY2gd2IqnjcYyOXD8XGCftpGtZP2AbHbOkthDkvRywH5ayNtPVy9YlOPcHckXzbLTCHpkb7FB+yuxKV13pQ=="
+    }
+  },
+  "workspace": {
+    "dependencies": [
+      "jsr:@hono/hono@^4.6.5"
+    ]
+  }
+}
