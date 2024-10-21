@@ -36,7 +36,7 @@ app.get("/", (c) => {
     return c.json({ error: "Invalid URL" });
   }
 
-  return shorten(url);
+  return c.json({ url, ...shorten(url) });
 });
 
 app.get("/:id", async (c) => {
