@@ -28,13 +28,7 @@ async function shorten(url: string) {
 }
 
 app.get("/", (c) => {
-  return c.redirect("https://github.com/evacuate");
-});
-
-app.get("/logo.svg", async (c) => {
-  const image = await Deno.readFile("./public/logo.svg");
-  c.header("Content-Type", "image/svg+xml");
-  return await c.body(image);
+  return c.redirect("https://deno.com", 301);
 });
 
 app.get("/favicon.ico", async (c) => {
@@ -46,17 +40,11 @@ app.get("/:id", async (c) => {
   const id = c.req.param("id");
   const storage = await kv.get([id]);
 
-  const body = `
-  <!doctypehtml><html lang=en><link href=/favicon.ico rel=icon sizes=32x32><link href=/logo.svg rel=icon type=image/svg+xml>
-  `;
-
   if (typeof storage.value === "string") {
-    c.header("Location", storage.value);
-  } else {
-    return c.json({ error: "Invalid storage value" });
+    return c.redirect(storage.value);
   }
 
-  return c.body(body);
+  return c.json({ error: "Invalid storage value" });
 });
 
 app.use(
