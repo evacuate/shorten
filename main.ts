@@ -39,6 +39,11 @@ app.get("/", async (c) => {
   return c.json(await shorten(url));
 });
 
+app.get("/favicon.ico", async (c) => {
+  const image = await Deno.readFile("./public/favicon.ico");
+  return await c.body(image);
+});
+
 app.get("/:id", async (c) => {
   const id = c.req.param("id");
   const storage = await kv.get([id]);
