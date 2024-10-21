@@ -33,6 +33,7 @@ app.get("/", (c) => {
 
 app.get("/logo.svg", async (c) => {
   const image = await Deno.readFile("./public/logo.svg");
+  c.header("Content-Type", "image/svg+xml");
   return await c.body(image);
 });
 
