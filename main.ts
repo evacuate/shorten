@@ -26,7 +26,7 @@ async function shorten(url: string) {
   return { key, url };
 }
 
-app.get("/", (c) => {
+app.get("/", async (c) => {
   const url = String(c.req.query("url"));
   if (url === "undefined") {
     return c.redirect("https://github.com/evacuate");
@@ -36,7 +36,7 @@ app.get("/", (c) => {
     return c.json({ error: "Invalid URL" });
   }
 
-  return c.json(shorten(url));
+  return c.json(await shorten(url));
 });
 
 app.get("/:id", async (c) => {
