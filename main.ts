@@ -28,7 +28,7 @@ async function shorten(url: string) {
 }
 
 app.get("/", (c) => {
-  return c.redirect("https://deno.com", 301);
+  return c.redirect("https://github.com/evacuate", 301);
 });
 
 app.get("/favicon.ico", async (c) => {
