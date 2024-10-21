@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { basicAuth } from "hono/basic-auth";
 import { customAlphabet } from "npm:nanoid";
 
 const app = new Hono();
@@ -26,17 +27,8 @@ async function shorten(url: string) {
   return { key, url };
 }
 
-app.get("/", async (c) => {
-  const url = String(c.req.query("url"));
-  if (url === "undefined") {
-    return c.redirect("https://github.com/evacuate");
-  }
-
-  if (!checkUrl(url)) {
-    return c.json({ error: "Invalid URL" });
-  }
-
-  return c.json(await shorten(url));
+app.get("/", (c) => {
+  return c.redirect("https://github.com/evacuate");
 });
 
 app.get("/favicon.ico", async (c) => {
@@ -48,6 +40,45 @@ app.get("/:id", async (c) => {
   const id = c.req.param("id");
   const storage = await kv.get([id]);
   return c.redirect(storage.value);
+});
+
+app.use(
+  "/api/*",
+  basicAuth({
+    username: "username",
+    password: "password",
+  })
+);
+
+app.post("/api/links", async (c) => {
+  const { url } = await c.req.parseBody();
+  if (typeof url !== "string" || url === "" || !checkUrl(url)) {
+    return c.json({ error: "Invalid URL" });
+  }
+
+  return c.json(await shorten(url));
+});
+
+app.patch("/api/links/:id", async (c) => {
+  const id = c.req.param("id");
+  const { url } = await c.req.parseBody();
+  if (typeof url !== "string" || url === "" || !checkUrl(url)) {
+    return c.json({ error: "Invalid URL" });
+  }
+
+  await kv.set([id], url);
+  return c.json({ message: "Updated" });
+});
+
+app.delete("/api/links/:id", async (c) => {
+  const id = c.req.param("id");
+
+  if (typeof id !== "string" || id === "") {
+    return c.json({ error: "Invalid ID" });
+  }
+
+  await kv.delete([id]);
+  return c.json({ message: "Deleted" });
 });
 
 Deno.serve(app.fetch);
