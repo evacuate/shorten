@@ -23,7 +23,7 @@ function checkUrl(str: string) {
 async function shorten(url: string) {
   const key = nanoid();
   await kv.set([key], url);
-  return { key };
+  return { key, url };
 }
 
 app.get("/", (c) => {
@@ -36,7 +36,7 @@ app.get("/", (c) => {
     return c.json({ error: "Invalid URL" });
   }
 
-  return c.json({ url, ...shorten(url) });
+  return c.json(shorten(url));
 });
 
 app.get("/:id", async (c) => {
