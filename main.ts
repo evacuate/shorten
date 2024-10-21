@@ -33,6 +33,7 @@ app.get("/", (c) => {
 
 app.get("/favicon.ico", async (c) => {
   const image = await Deno.readFile("./public/favicon.ico");
+  c.header("Content-Type", "image/x-icon");
   return await c.body(image);
 });
 
