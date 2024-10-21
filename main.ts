@@ -28,11 +28,31 @@ async function shorten(url: string) {
 }
 
 app.get("/", (c) => {
-  return c.redirect("https://github.com/evacuate", 301);
+  return c.html(
+    `<!doctype html>
+    <html>
+      <head>
+        <meta http-equiv="refresh" content="0;url=https://www.evacuate.jp/">
+        <link rel="icon" href="/favicon.ico">
+        <link rel="icon" href="/logo.svg" type="image/svg+xml">
+        <title>Redirecting...</title>
+      </head>
+      <body>
+        <script>
+          location="https://www.evacuate.jp/";
+        </script>
+      </body>
+    </html>`
+  );
 });
 
 app.get("/favicon.ico", async (c) => {
   const image = await Deno.readFile("./public/favicon.ico");
+  return await c.body(image);
+});
+
+app.get("/logo.svg", async (c) => {
+  const image = await Deno.readFile("./public/logo.svg");
   return await c.body(image);
 });
 
