@@ -61,8 +61,8 @@ app.get("/favicon.ico", async (c) => {
 app.use(
   "/api/*",
   basicAuth({
-    username: "username",
-    password: "password",
+    username: Deno.env.get("USERNAME") ?? "username",
+    password: Deno.env.get("PASSWORD") ?? "password",
   })
 );
 
