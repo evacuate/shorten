@@ -32,6 +32,16 @@ async function shorten(url: string) {
   return { key, url, clicks: 0 };
 }
 
+app.get("/", (c) => {
+  return c.redirect("https://github.com/evacuate", 301);
+});
+
+app.get("/favicon.ico", async (c) => {
+  const image = await Deno.readFile("./public/favicon.ico");
+  c.header("Content-Type", "image/x-icon");
+  return await c.body(image);
+});
+
 // Increment the click count and redirect to the stored URL
 app.get("/:id", async (c) => {
   const id = c.req.param("id");
@@ -46,16 +56,6 @@ app.get("/:id", async (c) => {
   }
 
   return c.json({ error: "Invalid storage value" });
-});
-
-app.get("/", (c) => {
-  return c.redirect("https://github.com/evacuate", 301);
-});
-
-app.get("/favicon.ico", async (c) => {
-  const image = await Deno.readFile("./public/favicon.ico");
-  c.header("Content-Type", "image/x-icon");
-  return await c.body(image);
 });
 
 app.use(
