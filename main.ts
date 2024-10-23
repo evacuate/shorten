@@ -42,6 +42,12 @@ app.get("/favicon.ico", async (c) => {
   return await c.body(image);
 });
 
+app.get("/robots.txt", async (c) => {
+  const robots = await Deno.readFile("./public/robots.txt");
+  c.header("Content-Type", "text/plain");
+  return await c.body(robots);
+});
+
 // Increment the click count and redirect to the stored URL
 app.get("/:id", async (c) => {
   const id = c.req.param("id");
