@@ -12,7 +12,7 @@ interface StorageValue {
 
 const nanoid = customAlphabet(
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
-  7
+  Number(Deno.env.get("LENGTH")) ?? 7
 );
 
 // Check if the string is a valid URL
