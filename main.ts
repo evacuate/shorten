@@ -5,6 +5,11 @@ import { customAlphabet } from "npm:nanoid";
 const app = new Hono();
 const kv = await Deno.openKv();
 
+interface StorageValue {
+  url: string;
+  clicks: number;
+}
+
 const nanoid = customAlphabet(
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
   7
@@ -20,12 +25,28 @@ function checkUrl(str: string) {
   }
 }
 
-// Shorten a URL
+// Shorten a URL and initialize click count to 0
 async function shorten(url: string) {
   const key = nanoid();
-  await kv.set([key], url);
-  return { key, url };
+  await kv.set([key], { url, clicks: 0 }); // Save URL with click count
+  return { key, url, clicks: 0 };
 }
+
+// Increment the click count and redirect to the stored URL
+app.get("/:id", async (c) => {
+  const id = c.req.param("id");
+  const storage = await kv.get<StorageValue>([id]);
+
+  if (storage.value && typeof storage.value.url === "string") {
+    // Increment click count
+    const updatedClicks = storage.value.clicks + 1;
+    await kv.set([id], { url: storage.value.url, clicks: updatedClicks });
+
+    return c.redirect(storage.value.url, 302);
+  }
+
+  return c.json({ error: "Invalid storage value" });
+});
 
 app.get("/", (c) => {
   return c.redirect("https://github.com/evacuate", 301);
@@ -35,17 +56,6 @@ app.get("/favicon.ico", async (c) => {
   const image = await Deno.readFile("./public/favicon.ico");
   c.header("Content-Type", "image/x-icon");
   return await c.body(image);
-});
-
-app.get("/:id", async (c) => {
-  const id = c.req.param("id");
-  const storage = await kv.get([id]);
-
-  if (typeof storage.value === "string") {
-    return c.redirect(storage.value, 302);
-  }
-
-  return c.json({ error: "Invalid storage value" });
 });
 
 app.use(
@@ -72,8 +82,14 @@ app.patch("/api/links/:id", async (c) => {
     return c.json({ error: "Invalid URL" });
   }
 
-  await kv.set([id], url);
-  return c.json({ message: "Updated" });
+  const storage = await kv.get<StorageValue>([id]);
+  if (storage.value) {
+    // Update the URL but keep the clicks count
+    await kv.set([id], { url, clicks: storage.value.clicks });
+    return c.json({ message: "Updated" });
+  }
+
+  return c.json({ error: "Invalid ID" });
 });
 
 app.delete("/api/links/:id", async (c) => {
@@ -85,6 +101,20 @@ app.delete("/api/links/:id", async (c) => {
 
   await kv.delete([id]);
   return c.json({ message: "Deleted" });
+});
+
+app.get("/api/analytics/:id", async (c) => {
+  const id = c.req.param("id");
+  const storage = await kv.get<StorageValue>([id]);
+
+  if (storage.value) {
+    return c.json({
+      url: storage.value.url,
+      clicks: storage.value.clicks,
+    });
+  }
+
+  return c.json({ error: "Invalid ID" });
 });
 
 Deno.serve(app.fetch);
