@@ -11,7 +11,7 @@
 
 ### Prerequisites
 
-- [Deno](https://deno.land/)
+- [Deno](https://deno.com/)
 - [Deno KV](https://deno.com/deploy/docs/kv)
 
 ### Installation
