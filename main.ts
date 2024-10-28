@@ -45,8 +45,15 @@ app.get("/favicon.ico", async (c) => {
 
 app.get("/robots.txt", async (c) => {
   const robots = await Deno.readFile("./public/robots.txt");
+  const host = c.req.header("host") ?? "localhost";
   c.header("Content-Type", "text/plain");
-  return c.body(robots);
+  const robotsStr = new TextDecoder().decode(robots);
+  return c.body(
+    robotsStr.replace(
+      "{{ URL }}",
+      new URL("/sitemap.xml", `https://${host}/`).toString()
+    )
+  );
 });
 
 app.get("/sitemap.xml", async (c) => {
