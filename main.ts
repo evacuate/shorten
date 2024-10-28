@@ -49,6 +49,16 @@ app.get("/robots.txt", async (c) => {
   return await c.body(robots);
 });
 
+app.get("/sitemap.xml", async (c) => {
+  const sitemap = await Deno.readFile("./public/sitemap.xml");
+  const host = c.req.header("host") ?? "localhost";
+  c.header("Content-Type", "application/xml");
+  const sitemapStr = new TextDecoder().decode(sitemap);
+  return c.body(
+    sitemapStr.replace("{{ URL }}", new URL("/", `https://${host}`).toString())
+  );
+});
+
 if (Deno.env.get("GOOGLE_SITE_VERIFICATION")) {
   app.get(`/${Deno.env.get("GOOGLE_SITE_VERIFICATION")}.html`, (c) => {
     const text = `google-site-verification: ${Deno.env.get(
