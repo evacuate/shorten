@@ -49,6 +49,16 @@ app.get("/robots.txt", async (c) => {
   return await c.body(robots);
 });
 
+if (Deno.env.get("GOOGLE_SITE_VERIFICATION")) {
+  app.get(`/${Deno.env.get("GOOGLE_SITE_VERIFICATION")}.html`, (c) => {
+    const text = `google-site-verification: ${Deno.env.get(
+      "GOOGLE_SITE_VERIFICATION"
+    )}.html`;
+    c.header("Content-Type", "text/html");
+    return c.body(text);
+  });
+}
+
 // Increment the click count and redirect to the stored URL
 app.get("/:id", async (c) => {
   const id = c.req.param("id");
