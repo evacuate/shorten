@@ -40,13 +40,13 @@ app.get("/", (c) => {
 app.get("/favicon.ico", async (c) => {
   const image = await Deno.readFile("./public/favicon.ico");
   c.header("Content-Type", "image/x-icon");
-  return await c.body(image);
+  return c.body(image);
 });
 
 app.get("/robots.txt", async (c) => {
   const robots = await Deno.readFile("./public/robots.txt");
   c.header("Content-Type", "text/plain");
-  return await c.body(robots);
+  return c.body(robots);
 });
 
 app.get("/sitemap.xml", async (c) => {
