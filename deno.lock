@@ -2,7 +2,8 @@
   "version": "4",
   "specifiers": {
     "jsr:@hono/hono@^4.6.5": "4.6.5",
-    "npm:nanoid@*": "5.0.7"
+    "npm:nanoid@*": "5.0.8",
+    "npm:nanoid@^5.0.8": "5.0.8"
   },
   "jsr": {
     "@hono/hono@4.6.5": {
@@ -10,13 +11,14 @@
     }
   },
   "npm": {
-    "nanoid@5.0.7": {
-      "integrity": "sha512-oLxFY2gd2IqnjcYyOXD8XGCftpGtZP2AbHbOkthDkvRywH5ayNtPVy9YlOPcHckXzbLTCHpkb7FB+yuxKV13pQ=="
+    "nanoid@5.0.8": {
+      "integrity": "sha512-TcJPw+9RV9dibz1hHUzlLVy8N4X9TnwirAjrU08Juo6BNKggzVfP2ZJ/3ZUSq15Xl5i85i+Z89XBO90pB2PghQ=="
     }
   },
   "workspace": {
     "dependencies": [
-      "jsr:@hono/hono@^4.6.5"
+      "jsr:@hono/hono@^4.6.5",
+      "npm:nanoid@^5.0.8"
     ]
   }
 }

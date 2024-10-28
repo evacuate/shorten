@@ -8,11 +8,12 @@ const kv = await Deno.openKv();
 interface StorageValue {
   url: string;
   clicks: number;
+  index: boolean;
 }
 
 const nanoid = customAlphabet(
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
-  Number(Deno.env.get("LENGTH")) ?? 7
+  Number(Deno.env.get("LENGTH")) || 7
 );
 
 // Check if the string is a valid URL
@@ -25,11 +26,10 @@ function checkUrl(str: string) {
   }
 }
 
-// Shorten a URL and initialize click count to 0
-async function shorten(url: string) {
+async function shorten(url: string, index: boolean = false) {
   const key = nanoid();
-  await kv.set([key], { url, clicks: 0 }); // Save URL with click count
-  return { key, url, clicks: 0 };
+  await kv.set([key], { url, clicks: 0, index }); // Save to KV
+  return { key, url, clicks: 0, index };
 }
 
 app.get("/", (c) => {
@@ -76,15 +76,17 @@ if (Deno.env.get("GOOGLE_SITE_VERIFICATION")) {
   });
 }
 
-// Increment the click count and redirect to the stored URL
 app.get("/:id", async (c) => {
   const id = c.req.param("id");
   const storage = await kv.get<StorageValue>([id]);
 
   if (storage.value && typeof storage.value.url === "string") {
-    // Increment click count
     const updatedClicks = storage.value.clicks + 1;
-    await kv.set([id], { url: storage.value.url, clicks: updatedClicks });
+    await kv.set([id], { ...storage.value, clicks: updatedClicks });
+
+    if (!storage.value.index) {
+      c.header("X-Robots-Tag", "noindex"); // Prevent indexing
+    }
 
     return c.redirect(storage.value.url, 302);
   }
@@ -101,25 +103,29 @@ app.use(
 );
 
 app.post("/api/links", async (c) => {
-  const { url } = await c.req.parseBody();
+  const { url, index } = await c.req.parseBody();
   if (typeof url !== "string" || url === "" || !checkUrl(url)) {
     return c.json({ error: "Invalid URL" });
   }
 
-  return c.json(await shorten(url));
+  return c.json(await shorten(url, index === "true"));
 });
 
 app.patch("/api/links/:id", async (c) => {
   const id = c.req.param("id");
-  const { url } = await c.req.parseBody();
+  const { url, index } = await c.req.parseBody();
+
   if (typeof url !== "string" || url === "" || !checkUrl(url)) {
     return c.json({ error: "Invalid URL" });
   }
 
   const storage = await kv.get<StorageValue>([id]);
   if (storage.value) {
-    // Update the URL but keep the clicks count
-    await kv.set([id], { url, clicks: storage.value.clicks });
+    await kv.set([id], {
+      url,
+      clicks: storage.value.clicks,
+      index: index === "true",
+    });
     return c.json({ message: "Updated" });
   }
 
@@ -145,6 +151,7 @@ app.get("/api/analytics/:id", async (c) => {
     return c.json({
       url: storage.value.url,
       clicks: storage.value.clicks,
+      index: storage.value.index,
     });
   }
 
