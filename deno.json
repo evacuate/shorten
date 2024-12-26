@@ -1,5 +1,6 @@
 {
   "imports": {
+    "@biomejs/biome": "npm:@biomejs/biome@^1.9.4",
     "hono": "jsr:@hono/hono@^4.6.5",
     "nanoid": "npm:nanoid@^5.0.8"
   },
