@@ -16,16 +16,6 @@ const nanoid = customAlphabet(
   Number(Deno.env.get("LENGTH")) || 7
 );
 
-// Check if the string is a valid URL
-function checkUrl(str: string) {
-  try {
-    new URL(str);
-    return true;
-  } catch (_err) {
-    return false;
-  }
-}
-
 async function shorten(url: string, index: boolean = false) {
   const key = nanoid();
   await kv.set([key], { url, clicks: 0, index }); // Save to KV
@@ -104,7 +94,7 @@ app.use(
 
 app.post("/api/links", async (c) => {
   const { url, index } = await c.req.parseBody();
-  if (typeof url !== "string" || url === "" || !checkUrl(url)) {
+  if (typeof url !== "string" || url === "" || !URL.canParse(url)) {
     return c.json({ error: "Invalid URL" });
   }
 
@@ -115,7 +105,7 @@ app.patch("/api/links/:id", async (c) => {
   const id = c.req.param("id");
   const { url, index } = await c.req.parseBody();
 
-  if (typeof url !== "string" || url === "" || !checkUrl(url)) {
+  if (typeof url !== "string" || url === "" || !URL.canParse(url)) {
     return c.json({ error: "Invalid URL" });
   }
 
